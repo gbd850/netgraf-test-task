@@ -1,4 +1,4 @@
-# nergraf-test-task
+# netgraf-test-task
 ## About
 This is a project for test task for Junior PHP Developer recruitment process.
 The task consisted of using Swagger Petstore API to fetch and manupulate data about pets.
