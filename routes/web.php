@@ -17,6 +17,6 @@ use Illuminate\Support\Facades\Route;
 Route::controller(PetController::class)->group(function () {
     Route::get('/', 'index')->name('index');
     Route::get('/delete/{id}', 'deletePet')->name('delete');
-    Route::put('/edit/{id}', 'showEdit')->name('showEdit');
-    Route::delete('/delete/{id}', 'deletePet')->name('deletePet');
+    Route::get('/edit/{id}', 'showEdit')->name('showEdit');
+    Route::post('/edit/{id}', 'editPet');
 });

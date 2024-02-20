@@ -55,7 +55,14 @@ class PetController extends Controller
 
     public function editPet(Request $req, $id)
     {
-        
+        $response = Http::setClient($this->http)->acceptJson()->asForm()->post('pet/' . $id, [
+            'name' => $req->input('pet_name'),
+            'status' => $req->input('pet_status')
+        ]);
+        if ($response->successful()) {
+            return $this->index();
+        }
+        return $response->throw();
     }
 
     public function deletePet($id)
