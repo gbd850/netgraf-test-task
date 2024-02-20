@@ -6,9 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
 use GuzzleHttp\Client;
-use Illuminate\Http\Response;
-
-use function Laravel\Prompts\alert;
+use Illuminate\Support\Facades\Validator;
 
 class PetController extends Controller
 {
@@ -21,13 +19,6 @@ class PetController extends Controller
             'base_uri' => config('values.apiUrl'),
             'verify' => base_path('cacert.pem'),
         ]);
-    }
-
-    public function index()
-    {
-        $pets = array_merge($this->getPetsByStatus('available'), $this->getPetsByStatus('pending'), $this->getPetsByStatus('sold'));
-        // dd($pets);
-        return view('index', ['pets' => $pets]);
     }
 
     private function getPetById(int $id)
@@ -48,6 +39,62 @@ class PetController extends Controller
         return $response->throw();
     }
 
+    public function index()
+    {
+        $pets = array_merge($this->getPetsByStatus('available'), $this->getPetsByStatus('pending'), $this->getPetsByStatus('sold'));
+        // dd($pets);
+        return view('index', ['pets' => $pets]);
+    }
+
+    public function showCreate()
+    {
+        return view('create');
+    }
+
+    public function createPet(Request $req)
+    {
+        $rules = [
+            'pet_id' => 'required|min:0',
+            'pet_name' => 'required',
+            'pet_category' => 'required',
+            'pet_status' => 'required'
+        ];
+
+        $validator = Validator::make($req->all(), $rules);
+        if ($validator->fails()) {
+            return redirect()->route('create')->with('failed', "{{$validator->errors()}}");
+        }
+
+        $formTags = $req->input('pet_tag');
+        $tags = array_map(
+            function ($tag, $index) {
+                return [
+                    'id' => $index,
+                    'name' => $tag
+                ];
+            },
+            $formTags,
+            array_keys($formTags)
+        );
+
+        $response = Http::setClient($this->http)->acceptJson()->post('pet', [
+            'id' => $req->input('pet_id'),
+            'category' => [
+                'id' => 0,
+                'name' => $req->input('pet_category')
+            ],
+            'name' => $req->input('pet_name'),
+            'photoUrls' => $req->input('pet_photo_url'),
+            'tags' => $tags,
+            'status' => $req->input('pet_status')
+        ]);
+
+        if ($response->successful()) {
+            return redirect()->route('index')->with('alert', 'Successfully created new pet');
+        }
+        return redirect()->route('create')->with('failed', "operation failed");
+    }
+
     public function showEdit($id)
     {
         return view('edit', ['pet' => $this->getPetById($id)]);
@@ -60,7 +107,7 @@ class PetController extends Controller
             'status' => $req->input('pet_status')
         ]);
         if ($response->successful()) {
-            return $this->index();
+            return redirect()->route('index');
         }
         return $response->throw();
     }
@@ -69,7 +116,7 @@ class PetController extends Controller
     {
         $response = Http::setClient($this->http)->acceptJson()->delete('pet/' . $id);
         if ($response->successful()) {
-            return $this->index();
+            return redirect()->route('index');
         }
         return redirect()->back()->with('alert', 'Something went wrong, could not delete selected pet');
     }
