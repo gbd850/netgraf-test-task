@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Client\RequestException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -24,7 +25,14 @@ class Handler extends ExceptionHandler
     public function register(): void
     {
         $this->reportable(function (Throwable $e) {
-            //
+            // 
+        });
+
+        $this->renderable(function (RequestException $e) {
+            // dd($e->getCode());
+            return response()->view('error', [
+                'error' => $e
+            ]);
         });
     }
 }

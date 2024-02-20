@@ -1,0 +1,4 @@
+<div>
+    <h1>{{ $error->getCode() }}</h1>
+    <p>{{ $error->getMessage() }}</p>
+</div>

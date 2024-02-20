@@ -109,7 +109,7 @@ class PetController extends Controller
         if ($response->successful()) {
             return redirect()->route('index');
         }
-        return $response->throw();
+        return redirect()->route('index')->with('alert', 'Something went wrong, could not edit selected pet');
     }
 
     public function deletePet($id)
