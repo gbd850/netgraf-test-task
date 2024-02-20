@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PetController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,6 +14,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::controller(PetController::class)->group(function () {
+    Route::get('/', 'index')->name('index');
+    Route::get('/delete/{id}', 'deletePet')->name('delete');
+    Route::put('/edit/{id}', 'showEdit')->name('showEdit');
+    Route::delete('/delete/{id}', 'deletePet')->name('deletePet');
 });
